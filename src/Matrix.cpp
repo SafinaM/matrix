@@ -1,9 +1,9 @@
 //
 // Created by mar on 02.10.2022.
 //
-#include "../include/Matrix.h"
-#include "../include/MatrixException.h"
-#include "../include/Enums.h"
+#include <Matrix.h>
+#include <MatrixException.h>
+#include <Enums.h>
 
 #include <iostream>
 #include <vector>
@@ -184,14 +184,12 @@ Matrix::const_iterator Matrix::end() const {
 	return const_iterator();
 }
 
-// определите методы rbegin / rend
 Matrix::const_reverse_iterator Matrix::rbegin() const {
 	return !m_vector.empty() ? const_reverse_iterator(end()) : const_reverse_iterator();
 }
 Matrix::const_reverse_iterator Matrix::rend()   const {
 	return !m_vector.empty() ? const_reverse_iterator(begin()) : const_reverse_iterator();
 }
-
 
 void Matrix::applyMathOperator(const Matrix& matrix, std::function<int(int, int)> op) {
 

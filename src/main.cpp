@@ -1,4 +1,4 @@
-#include "../include/Matrix.h"
+#include <Matrix.h>
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -61,11 +61,18 @@ int main() {
 		Matrix f = std::move(matrix1);
 		assertMatrix(testVectorForMovingTest, f);
 
-		// here exception should be thrown
-		Matrix matrix6{{1, 1, 1}, {1, 1, 1, 4}};
+		// different sizes of input matricies
+		std::cout << "different sizes of input matricies..." << std::endl;
+		Matrix matrix6{{1, 1, 1, 2}, {1, 1, 1, 2}};
+		Matrix matrix7{{1, 1, 1}, {1, 1, 1}};
 
-	} catch (const std::exception& e) {\
-		std::cout << "Processing of test exception!:" << std::endl;
+		auto statusSum = matrix6.sum(matrix7);
+		assert(statusSum == Errors::InvalidSizes);
+
+		// here exception should be thrown
+		Matrix matrix8{{1, 1, 1}, {1, 1, 1, 1}};
+	} catch (const std::exception& e) {
+		std::cout << "Processing of test exception! " << std::endl;
 		std::cerr << e.what() << std::endl;
 	} catch (...) {
 		std::cerr << "Something bad has happened! Possible memory corruption!" << std::endl;

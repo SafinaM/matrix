@@ -97,5 +97,4 @@ private:
 
 	bool areSizesTheSame(const Matrix& matrix);
 
-
 };
