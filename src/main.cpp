@@ -11,7 +11,8 @@
 // indexing with the help []
 // sum
 
-void assertMatrix(const std::vector<std::vector<int>>& refVector, const Matrix& matrix) {
+template <typename T>
+void assertMatrix(const std::vector<std::vector<int>>& refVector, const Matrix<T>& matrix) {
 	for (std::size_t i = 0; i < matrix.getHeight(); ++i) {
 		for (std::size_t j = 0; j < matrix.getWidth(); ++j) {
 			assert(refVector[i][j] == matrix[i][j]);
@@ -23,14 +24,14 @@ int main() {
 	try {
 		std::cout << "Test stage...\n" << std::endl;
 		std::cout << "Initializer list...\n" << std::endl;
-		Matrix matrix1{{10, 15, 15}, {30, 10, 18}};
-		Matrix matrix2{{1, 1, 1}, {1, 1, 1}};
+		Matrix<int> matrix1{{10, 15, 15}, {30, 10, 18}};
+		Matrix<int> matrix2{{1, 1, 1}, {1, 1, 1}};
 		// empty matrix
-		Matrix matrix3{};
+		Matrix<int> matrix3{};
 		// 1 row matrix
-		Matrix matrix4{{45, 23, 24, 19, 24, 23, 34}};
+		Matrix<int> matrix4{{45, 23, 24, 19, 24, 23, 34}};
 		// matrix with empty rows
-		Matrix matrix5{{}, {}, {}};
+		Matrix<int> matrix5{{}, {}, {}};
 
 		int testArr1[] = {10, 15, 15, 30, 10, 18};
 		uint32_t i = 0;
@@ -63,14 +64,17 @@ int main() {
 
 		// different sizes of input matricies
 		std::cout << "different sizes of input matricies..." << std::endl;
-		Matrix matrix6{{1, 1, 1, 2}, {1, 1, 1, 2}};
-		Matrix matrix7{{1, 1, 1}, {1, 1, 1}};
+		Matrix<int> matrix6{{1, 1, 1, 2}, {1, 1, 1, 2}};
+		Matrix<int> matrix7{{1, 1, 1}, {1, 1, 1}};
 
 		auto statusSum = matrix6.sum(matrix7);
 		assert(statusSum == Errors::InvalidSizes);
+		std::cout << "different types of a matricies..." << std::endl;
+		Matrix<double> matrix8{{1.23, 23.123, 45.234}};
+		Matrix<float> matrix9{{1.23f, 23.123f, 45.234f}, {1.23f, 23.123f, 45.234f}};
 
 		// here exception should be thrown
-		Matrix matrix8{{1, 1, 1}, {1, 1, 1, 1}};
+		Matrix<int> matrix10{{1, 1, 1}, {1, 1, 1, 1}};
 	} catch (const std::exception& e) {
 		std::cout << "Processing of test exception! " << std::endl;
 		std::cerr << e.what() << std::endl;

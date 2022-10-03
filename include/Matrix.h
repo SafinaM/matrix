@@ -15,24 +15,25 @@
 #include <vector>
 #include <iterator>
 
+template <typename T>
 struct Matrix {
-	Matrix(uint32_t width, uint32_t heigth) :
+	Matrix(short width, short heigth) :
 	m_width(width),
 	m_height(heigth),
-	m_vector(std::vector(heigth, std::vector<int>(width, 0))) {}
+	m_vector(std::vector(heigth, std::vector<T>(width, T()))) {}
 
-	Matrix(std::initializer_list<std::vector<int>> list);
+	Matrix(std::initializer_list<std::vector<T>> list);
 
 	Matrix(Matrix&& matrix) = default;
 	Matrix(const Matrix& matrix) = default;
 	Matrix& operator =(const Matrix& matrix) = default;
 
-	uint32_t getWidth() const noexcept ;
-	uint32_t getHeight() const noexcept;
+	short getWidth() const noexcept ;
+	short getHeight() const noexcept;
 
-	std::vector<int>& operator[](uint32_t i);
+	std::vector<T>& operator[](short i);
 
-	std::vector<int> operator[](uint32_t i) const;
+	std::vector<T> operator[](short i) const;
 
 	void clear() noexcept;
 
@@ -42,13 +43,13 @@ struct Matrix {
 
 	Matrix operator + (const Matrix& matrix);
 
-	using value_type = int;
+	using value_type = T;
 	using VectT = std::vector<int>;
 	using ListT = std::vector<VectT>;
 
 	size_t fullSize() const;
 
-	struct const_iterator : std::iterator<std::bidirectional_iterator_tag, const int> {
+	struct const_iterator : std::iterator<std::bidirectional_iterator_tag, const T> {
 		typename ListT::const_iterator ItL;
 		typename VectT::const_iterator ItV;
 		const ListT* ptr;
@@ -87,14 +88,229 @@ struct Matrix {
 
 private:
 
-	std::vector<std::vector<int>> m_vector;
+	std::vector<std::vector<T>> m_vector;
 	unsigned int m_width = 0;
 	unsigned int m_height = 0;
 
-	void applyMathOperator(const Matrix& matrix, std::function<int(int, int)> op);
+	void applyMathOperator(const Matrix& matrix, std::function<T(T, T)> op);
 
 	bool validateForConcatenation(const Matrix& matrix, DirectionOfConcatenation direction);
 
 	bool areSizesTheSame(const Matrix& matrix);
 
 };
+
+
+template <typename T>
+Matrix<T>::Matrix(std::initializer_list<std::vector<T>> list) : m_vector(list) {
+	if (!m_vector.empty()) {
+		m_width = m_vector[0].size(); // here we sure that size is not zero
+		for (const auto& row: m_vector) {
+			if (m_width != row.size())
+				throw MatrixException("Width of the rows are not the same!");
+		}
+		m_height = m_vector.size();
+	}
+}
+
+template <typename T>
+short Matrix<T>::getWidth() const noexcept {
+	return m_width;
+}
+
+template <typename T>
+short Matrix<T>::getHeight() const noexcept {
+	return m_height;
+}
+
+template <typename T>
+std::vector<T>& Matrix<T>::operator[](short i) {
+	return m_vector[i];
+}
+
+template <typename T>
+std::vector<T> Matrix<T>::operator[](short i) const {
+	return m_vector[i];
+}
+
+template <typename T>
+void Matrix<T>::clear() noexcept {
+	m_vector.clear();
+	m_width = 0;
+	m_height = 0;
+}
+
+template <typename T>
+bool Matrix<T>::areSizesTheSame(const Matrix<T>& matrix) {
+	return getHeight() == matrix.getHeight() && getWidth() == matrix.getWidth();
+}
+
+template <typename T>
+Errors Matrix<T>::sum(const Matrix<T>& matrix) noexcept {
+	if (!areSizesTheSame(matrix))
+		return Errors::InvalidSizes;
+
+	applyMathOperator(matrix, std::plus<int>());
+
+	return Errors::Ok;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator | (const Matrix<T>& matrix) {
+
+	if (!validateForConcatenation(matrix, DirectionOfConcatenation::Right))
+		throw std::runtime_error("Invalid sizes");
+
+	uint32_t newWidth = getWidth() + matrix.getWidth();
+
+	// full allocation for 1 time
+	Matrix<T> newMatrix(newWidth, getHeight());
+
+	for (uint32_t i = 0; i < m_height; ++i) {
+		assert(newWidth > getWidth());
+		copy(m_vector[i].begin(), m_vector[i].end(), newMatrix[i].begin());
+		const auto& row = matrix[i];
+		std::copy(row.begin(), row.end(), newMatrix[i].begin() + getWidth());
+	}
+
+	return newMatrix;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::operator + (const Matrix<T>& matrix) {
+
+	if (!validateForConcatenation(matrix, DirectionOfConcatenation::Bottom))
+		throw MatrixException("Invalid sizes");
+
+	uint32_t newHeight = getHeight() + matrix.getHeight();
+
+	// full allocation for 1 time, more memory, but we avoid some allocations (system calls)
+	Matrix<T> newMatrix(getWidth(), newHeight);
+
+	for (uint32_t i = 0; i < m_height; ++i) {
+		assert(newHeight > getHeight());
+		// copy first matrix by string
+		copy(m_vector[i].begin(), m_vector[i].end(), newMatrix[i].begin());
+	}
+
+	const uint32_t matrixheight = matrix.getHeight();
+	for (uint32_t i = 0; i < matrixheight; ++i) {
+		assert(newHeight > getHeight());
+		std::copy(matrix.m_vector[i].begin(), matrix.m_vector[i].end(), newMatrix[i + getHeight()].begin());
+	}
+
+	return newMatrix;
+}
+
+template <typename T>
+size_t Matrix<T>::fullSize() const {
+	size_t ans = 0;
+	for (auto &v : m_vector) {
+		ans += v.size();
+	}
+	return ans;
+}
+
+template <typename T>
+Matrix<T>::const_iterator::const_iterator(const ListT* ptr_) :
+	ItL(ptr_->cbegin()), ItV(ItL->cbegin()), ptr(ptr_){};
+
+template <typename T>
+typename Matrix<T>::const_iterator Matrix<T>::const_iterator::operator--(int) {
+	auto tmp = *this;
+	--(*this);
+	return tmp;
+}
+
+template <typename T>
+bool Matrix<T>::const_iterator::operator== (const const_iterator& right) const {
+	return (ItL==right.ItL && ItV==right.ItV);
+}
+
+template <typename T>
+bool Matrix<T>::const_iterator::operator!= (const const_iterator& right) const {
+	return !(ItL==right.ItL && ItV==right.ItV);
+}
+
+template <typename T>
+const int* Matrix<T>::const_iterator::operator->() const { return &(*ItV); }
+
+template <typename T>
+typename Matrix<T>::const_iterator Matrix<T>::begin() const {
+	return !m_vector.empty() ? const_iterator(&m_vector) : const_iterator();
+}
+
+template <typename T>
+typename Matrix<T>::const_iterator Matrix<T>::end() const {
+	if (!m_vector.empty())
+		return const_iterator(&m_vector).in_end();
+
+	return const_iterator();
+}
+
+template <typename T>
+typename Matrix<T>::const_reverse_iterator Matrix<T>::rbegin() const {
+	return !m_vector.empty() ? const_reverse_iterator(end()) : const_reverse_iterator();
+}
+
+template <typename T>
+typename Matrix<T>::const_reverse_iterator Matrix<T>::rend()   const {
+	return !m_vector.empty() ? const_reverse_iterator(begin()) : const_reverse_iterator();
+}
+
+template <typename T>
+void Matrix<T>::applyMathOperator(const Matrix<T>& matrix, std::function<T(T, T)> op) {
+
+	assert(getWidth() == matrix.getWidth());
+	assert(getHeight() == matrix.getHeight());
+
+	for (uint32_t i = 0; i < matrix.getHeight(); ++i) {
+		for (uint32_t j = 0; j < matrix.getWidth(); ++j) {
+			m_vector[i][j] = op(m_vector[i][j], matrix[i][j]);
+		}
+	}
+}
+
+template <typename T>
+bool Matrix<T>::validateForConcatenation(const Matrix<T>& matrix, DirectionOfConcatenation direction) {
+
+	if (direction == DirectionOfConcatenation::Right) {
+		return getHeight() == matrix.getHeight();
+	}
+
+	if (direction == DirectionOfConcatenation::Bottom) {
+		return getWidth() == matrix.getWidth();
+	}
+	return false; // yes, by default return false
+}
+
+template <typename T>
+typename Matrix<T>::const_iterator& Matrix<T>::const_iterator::operator++() {
+	if (ItV == std::prev((*ItL).cend())) {
+		++ItL;
+		if (ItL != ptr->cend()) {
+			ItV = ItL->cbegin();
+		} else {++ItV; --ItL; }
+	}
+	else
+		++ItV;
+
+	return *this;
+}
+
+template <typename T>
+typename Matrix<T>::const_iterator Matrix<T>::const_iterator::operator++(int) {
+	auto tmp = *this;
+	++(*this);
+	return tmp;
+}
+
+template <typename T>
+typename Matrix<T>::const_iterator& Matrix<T>::const_iterator::in_end() {
+	ItL = --(ptr->cend());
+	ItV = ItL->cend();
+	return *this;
+}
+
+template <typename T>
+const int& Matrix<T>::const_iterator::operator*() const { return *ItV; };

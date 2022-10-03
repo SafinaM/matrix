@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_INSTALL_PREFIX install)
 
-set(SOURCES Matrix.cpp MatrixException.cpp)
+set(SOURCES MatrixException.cpp)
 
 add_executable(matrix ${SOURCES} main.cpp)
 
