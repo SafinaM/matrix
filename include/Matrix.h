@@ -54,7 +54,7 @@ struct Matrix {
 		typename VectT::const_iterator ItV;
 		const ListT* ptr;
 
-		// code for iterator I wrote as a test task for Stepic platform three years ago
+		// code for iterator of 2Dim matrix I wrote as a test task for Stepic platform three years ago
 		const_iterator() = default;
 		~const_iterator() = default;
 		const_iterator(const const_iterator& It) = default;
@@ -89,8 +89,8 @@ struct Matrix {
 private:
 
 	std::vector<std::vector<T>> m_vector;
-	unsigned int m_width = 0;
-	unsigned int m_height = 0;
+	unsigned short m_width = 0;
+	unsigned short m_height = 0;
 
 	void applyMathOperator(const Matrix& matrix, std::function<T(T, T)> op);
 
@@ -161,12 +161,12 @@ Matrix<T> Matrix<T>::operator | (const Matrix<T>& matrix) {
 	if (!validateForConcatenation(matrix, DirectionOfConcatenation::Right))
 		throw std::runtime_error("Invalid sizes");
 
-	uint32_t newWidth = getWidth() + matrix.getWidth();
+	// let's believe that newWidth is also small number
+	unsigned short newWidth = getWidth() + matrix.getWidth();
 
-	// full allocation for 1 time
 	Matrix<T> newMatrix(newWidth, getHeight());
 
-	for (uint32_t i = 0; i < m_height; ++i) {
+	for (unsigned short i = 0; i < m_height; ++i) {
 		assert(newWidth > getWidth());
 		copy(m_vector[i].begin(), m_vector[i].end(), newMatrix[i].begin());
 		const auto& row = matrix[i];
@@ -182,19 +182,17 @@ Matrix<T> Matrix<T>::operator + (const Matrix<T>& matrix) {
 	if (!validateForConcatenation(matrix, DirectionOfConcatenation::Bottom))
 		throw MatrixException("Invalid sizes");
 
-	uint32_t newHeight = getHeight() + matrix.getHeight();
+	unsigned short newHeight = getHeight() + matrix.getHeight();
 
-	// full allocation for 1 time, more memory, but we avoid some allocations (system calls)
 	Matrix<T> newMatrix(getWidth(), newHeight);
 
-	for (uint32_t i = 0; i < m_height; ++i) {
+	for (unsigned short i = 0; i < m_height; ++i) {
 		assert(newHeight > getHeight());
-		// copy first matrix by string
 		copy(m_vector[i].begin(), m_vector[i].end(), newMatrix[i].begin());
 	}
 
-	const uint32_t matrixheight = matrix.getHeight();
-	for (uint32_t i = 0; i < matrixheight; ++i) {
+	const unsigned short matrixheight = matrix.getHeight();
+	for (unsigned short i = 0; i < matrixheight; ++i) {
 		assert(newHeight > getHeight());
 		std::copy(matrix.m_vector[i].begin(), matrix.m_vector[i].end(), newMatrix[i + getHeight()].begin());
 	}
@@ -264,8 +262,8 @@ void Matrix<T>::applyMathOperator(const Matrix<T>& matrix, std::function<T(T, T)
 	assert(getWidth() == matrix.getWidth());
 	assert(getHeight() == matrix.getHeight());
 
-	for (uint32_t i = 0; i < matrix.getHeight(); ++i) {
-		for (uint32_t j = 0; j < matrix.getWidth(); ++j) {
+	for (unsigned short i = 0; i < matrix.getHeight(); ++i) {
+		for (unsigned short j = 0; j < matrix.getWidth(); ++j) {
 			m_vector[i][j] = op(m_vector[i][j], matrix[i][j]);
 		}
 	}
