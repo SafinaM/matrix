@@ -3,12 +3,12 @@
 #include <vector>
 #include <cassert>
 
-//Let's writa a class of a matrix m * b, where m and n are comparably small number:
+//Let's writa a class of a matrix m * b, where m and n are comparably small numbers:
 // Support:
 // moving, copying
-// itration in range-based loops,
-// concatanation with operator |
-// indexing with the help []
+// iteration in range-based loops,
+// concatenation with operator |
+// indexing with the help of []
 // sum
 
 template <typename T>
@@ -26,10 +26,14 @@ int main() {
 		std::cout << "Initializer list...\n" << std::endl;
 		Matrix<int> matrix1{{10, 15, 15}, {30, 10, 18}};
 		Matrix<int> matrix2{{1, 1, 1}, {1, 1, 1}};
+
 		// empty matrix
 		Matrix<int> matrix3{};
 		// 1 row matrix
 		Matrix<int> matrix4{{45, 23, 24, 19, 24, 23, 34}};
+
+		Matrix<float> matrixFloat{{1.f, 2.3, 3.4}, {2.1, 1.1, 3.3}};
+		std::vector<float> testMatrixFloat{1.f, 2.3f, 3.4f, 2.1f, 1.1f, 3.3f};
 		// matrix with empty rows
 		Matrix<int> matrix5{{}, {}, {}};
 
@@ -38,6 +42,11 @@ int main() {
 		std::cout << "Test of a range-based loop...\n" << std::endl;
 		for (const auto& elem: matrix1) {
 			assert(elem == testArr1[i++]);
+		}
+
+		i = 0;
+		for (const auto& elem: matrixFloat) {
+			assert((elem - testMatrixFloat[i++]) < 0.0001);
 		}
 
 		std::cout << "Test of sum...\n" << std::endl;
@@ -70,13 +79,16 @@ int main() {
 		auto statusSum = matrix6.sum(matrix7);
 		assert(statusSum == Errors::InvalidSizes);
 		std::cout << "different types of a matricies..." << std::endl;
-		Matrix<double> matrix8{{1.23, 23.123, 45.234}};
+		Matrix<double> matrix8{{1.3, 2.4}, {3.8, 4.0}};
+
 		Matrix<float> matrix9{{1.23f, 23.123f, 45.234f}, {1.23f, 23.123f, 45.234f}};
 		Matrix<float> matrix10{{1.2, 1.2f, 2.f}, {1.f, 1.f, 1.f}};
 		std::vector<std::vector<float>> testVectorSum{{2.43f, 24.323f, 47.234f}, {2.23f, 24.123f, 46.234f}};
-
+		for (const auto& elem: matrix9) {
+			std::cout << elem << std::endl;
+		}
 		auto statusFloatSum = matrix9.sum(matrix10);
-		assert(statusFloatSum = Errors::Ok);
+		assert(statusFloatSum == Errors::Ok);
 		assertMatrix(testVectorSum, matrix9);
 
 		// here exception should be thrown

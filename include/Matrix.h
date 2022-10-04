@@ -44,7 +44,7 @@ struct Matrix {
 	Matrix operator + (const Matrix& matrix);
 
 	using value_type = T;
-	using VectT = std::vector<int>;
+	using VectT = std::vector<T>;
 	using ListT = std::vector<VectT>;
 
 	size_t fullSize() const;
@@ -63,7 +63,7 @@ struct Matrix {
 
 		const_iterator& in_end();
 
-		const int& operator*() const;
+		const T& operator*() const;
 
 		const_iterator& operator++();
 		const_iterator operator++(int);
@@ -74,7 +74,7 @@ struct Matrix {
 		bool operator== (const const_iterator& right) const;
 
 		bool operator!= (const const_iterator& right) const ;
-		const int* operator->() const;
+		const T* operator->() const;
 
 	};
 
@@ -231,7 +231,7 @@ bool Matrix<T>::const_iterator::operator!= (const const_iterator& right) const {
 }
 
 template <typename T>
-const int* Matrix<T>::const_iterator::operator->() const { return &(*ItV); }
+const T* Matrix<T>::const_iterator::operator->() const { return &(*ItV); }
 
 template <typename T>
 typename Matrix<T>::const_iterator Matrix<T>::begin() const {
@@ -311,4 +311,4 @@ typename Matrix<T>::const_iterator& Matrix<T>::const_iterator::in_end() {
 }
 
 template <typename T>
-const int& Matrix<T>::const_iterator::operator*() const { return *ItV; };
+const T& Matrix<T>::const_iterator::operator*() const { return *ItV; };
