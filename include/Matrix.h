@@ -150,7 +150,7 @@ Errors Matrix<T>::sum(const Matrix<T>& matrix) noexcept {
 	if (!areSizesTheSame(matrix))
 		return Errors::InvalidSizes;
 
-	applyMathOperator(matrix, std::plus<int>());
+	applyMathOperator(matrix, std::plus<T>());
 
 	return Errors::Ok;
 }
