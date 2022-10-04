@@ -12,7 +12,7 @@
 // sum
 
 template <typename T>
-void assertMatrix(const std::vector<std::vector<int>>& refVector, const Matrix<T>& matrix) {
+void assertMatrix(const std::vector<std::vector<T>>& refVector, const Matrix<T>& matrix) {
 	for (std::size_t i = 0; i < matrix.getHeight(); ++i) {
 		for (std::size_t j = 0; j < matrix.getWidth(); ++j) {
 			assert(refVector[i][j] == matrix[i][j]);
@@ -72,9 +72,15 @@ int main() {
 		std::cout << "different types of a matricies..." << std::endl;
 		Matrix<double> matrix8{{1.23, 23.123, 45.234}};
 		Matrix<float> matrix9{{1.23f, 23.123f, 45.234f}, {1.23f, 23.123f, 45.234f}};
+		Matrix<float> matrix10{{1.2, 1.2f, 2.f}, {1.f, 1.f, 1.f}};
+		std::vector<std::vector<float>> testVectorSum{{2.43f, 24.323f, 47.234f}, {2.23f, 24.123f, 46.234f}};
+
+		auto statusFloatSum = matrix9.sum(matrix10);
+		assert(statusFloatSum = Errors::Ok);
+		assertMatrix(testVectorSum, matrix9);
 
 		// here exception should be thrown
-		Matrix<int> matrix10{{1, 1, 1}, {1, 1, 1, 1}};
+		Matrix<int> matrix11{{1, 1, 1}, {1, 1, 1, 1}};
 	} catch (const std::exception& e) {
 		std::cout << "Processing of test exception! " << std::endl;
 		std::cerr << e.what() << std::endl;
